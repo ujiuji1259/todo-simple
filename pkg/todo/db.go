@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	// "github.com/mithrandie/csvq/lib/query"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/rs/xid"
 
