@@ -3,12 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"time"
 
-	"github.com/adrg/xdg"
 	"github.com/manifoldco/promptui"
-	"todo-simple/pkg/todo"
 )
 
 type AddCmd struct{}
@@ -19,12 +16,20 @@ func (c *AddCmd) Run() error {
 		return fmt.Errorf("Error loading todo from UI: %w\n", err)
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	todoPath := filepath.Join(xdg.DataHome, "todo-simple")
-	db, err := todo.NewTsvDb(ctx, todoPath)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	db, err := getDb()
 	if err != nil {
-		return fmt.Errorf("Error initializing todo manager: %w\n", err)
+		fmt.Printf("Error initializing todo manager: %v\n", err)
+		return err
 	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			panic(err)
+		}
+	}()
+
 	err = db.Add(ctx, taskName, projectName)
 	if err != nil {
 		return fmt.Errorf("Error loading todo manager: %v\n", err)

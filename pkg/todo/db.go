@@ -20,7 +20,7 @@ type TsvDb struct {
 	Db *sql.DB
 }
 
-func NewTsvDb(ctx context.Context, path string) (*TsvDb, error) {
+func NewTsvDb(path string) (*TsvDb, error) {
 	db, err := sql.Open("csvq", path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open csvq: %w", err)
@@ -29,6 +29,10 @@ func NewTsvDb(ctx context.Context, path string) (*TsvDb, error) {
 	return &TsvDb{
 		Db: db,
 	}, nil
+}
+
+func (db *TsvDb) Close() error {
+	return db.Db.Close()
 }
 
 func addDelemiterToQuery(query string) string {
