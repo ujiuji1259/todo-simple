@@ -6,8 +6,6 @@ import (
 )
 
 var CLI struct {
-	Add cmd.AddCmd `cmd:"" help:"Add task"`
-	Delete cmd.DeleteCmd `cmd:"" help:"Delete task"`
 	List cmd.ListCmd `cmd:"" help:"List task"`
 }
 

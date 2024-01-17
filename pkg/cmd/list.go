@@ -1,10 +1,16 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"time"
+	"path/filepath"
+	"os"
+	"strconv"
+
+	"github.com/olekukonko/tablewriter"
 
 	"todo-simple/pkg/todo"
-	"todo-simple/pkg/manager"
 	"github.com/adrg/xdg"
 )
 
@@ -14,15 +20,31 @@ type ListCmd struct {
 }
 
 func (c *ListCmd) Run() error {
-	todoFilePath, err := xdg.DataFile("todo-simple/todo.tsv")
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	todoPath := filepath.Join(xdg.DataHome, "todo-simple")
+	db, err := todo.NewTsvDb(ctx, todoPath)
 	if err != nil {
+		fmt.Printf("Error initializing todo manager: %v\n", err)
 		return err
 	}
-	todoManager, err := manager.NewTodoManagerFromFile(todoFilePath)
+	items, err := db.List(ctx)
 	if err != nil {
-		fmt.Printf("Error loading todo manager: %v\n", err)
-		return err
+		return fmt.Errorf("failed to list: %w", err)
 	}
-	todoManager.List(c.Project, c.Status)
+	renderTodoItems(items)
 	return nil
+}
+
+func renderTodoItems(todoItems []*todo.TodoItem) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Id", "Task Name", "Project Name", "Status"})
+	for _, v := range todoItems {
+		table.Append([]string{
+			strconv.Itoa(int(v.Id)),
+			v.TaskName,
+			v.Project,
+			v.Status.String(),
+		})
+	}
+	table.Render()
 }
