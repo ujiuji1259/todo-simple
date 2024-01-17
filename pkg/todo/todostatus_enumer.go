@@ -6,9 +6,9 @@ import (
 	"fmt"
 )
 
-const _TodoStatusName = "DoneTodo"
+const _TodoStatusName = "DoneTodoWait"
 
-var _TodoStatusIndex = [...]uint8{0, 4, 8}
+var _TodoStatusIndex = [...]uint8{0, 4, 8, 12}
 
 func (i TodoStatus) String() string {
 	if i < 0 || i >= TodoStatus(len(_TodoStatusIndex)-1) {
@@ -17,11 +17,12 @@ func (i TodoStatus) String() string {
 	return _TodoStatusName[_TodoStatusIndex[i]:_TodoStatusIndex[i+1]]
 }
 
-var _TodoStatusValues = []TodoStatus{0, 1}
+var _TodoStatusValues = []TodoStatus{0, 1, 2}
 
 var _TodoStatusNameToValueMap = map[string]TodoStatus{
-	_TodoStatusName[0:4]: 0,
-	_TodoStatusName[4:8]: 1,
+	_TodoStatusName[0:4]:  0,
+	_TodoStatusName[4:8]:  1,
+	_TodoStatusName[8:12]: 2,
 }
 
 // TodoStatusString retrieves an enum value from the enum constants string name.

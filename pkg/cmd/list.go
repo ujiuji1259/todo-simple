@@ -3,20 +3,19 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"time"
-	"path/filepath"
 	"os"
-	"strconv"
+	"path/filepath"
+	"time"
 
 	"github.com/olekukonko/tablewriter"
 
-	"todo-simple/pkg/todo"
 	"github.com/adrg/xdg"
+	"todo-simple/pkg/todo"
 )
 
 type ListCmd struct {
-	Project []string `help:"Project name"`
-	Status []todo.TodoStatus `help:"Status"`
+	Project []string          `help:"Project name"`
+	Status  []todo.TodoStatus `help:"Status"`
 }
 
 func (c *ListCmd) Run() error {
@@ -27,7 +26,7 @@ func (c *ListCmd) Run() error {
 		fmt.Printf("Error initializing todo manager: %v\n", err)
 		return err
 	}
-	items, err := db.List(ctx)
+	items, err := db.ListItems(ctx, c.Project, c.Status)
 	if err != nil {
 		return fmt.Errorf("failed to list: %w", err)
 	}
@@ -40,7 +39,7 @@ func renderTodoItems(todoItems []*todo.TodoItem) {
 	table.SetHeader([]string{"Id", "Task Name", "Project Name", "Status"})
 	for _, v := range todoItems {
 		table.Append([]string{
-			strconv.Itoa(int(v.Id)),
+			v.Id,
 			v.TaskName,
 			v.Project,
 			v.Status.String(),

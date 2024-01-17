@@ -6,7 +6,10 @@ import (
 )
 
 var CLI struct {
-	List cmd.ListCmd `cmd:"" help:"List task"`
+	List   cmd.ListCmd   `cmd:"" help:"List task"`
+	Add    cmd.AddCmd    `cmd:"" help:"Add task"`
+	Delete cmd.DeleteCmd `cmd:"" help:"Add task"`
+	Update cmd.UpdateCmd `cmd:"" help:"Update status of the specified task"`
 }
 
 func main() {
