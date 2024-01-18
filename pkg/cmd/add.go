@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/manifoldco/promptui"
+
+	"todo-simple/pkg/todo"
 )
 
 type AddCmd struct{}
@@ -30,7 +32,11 @@ func (c *AddCmd) Run() error {
 		}
 	}()
 
-	err = db.Add(ctx, taskName, projectName)
+	newTodoItem, err := todo.NewTodoItem(taskName, projectName)
+	if err != nil {
+		return fmt.Errorf("Error initializing todo item: %w\n", err)
+	}
+	err = db.Add(ctx, *newTodoItem)
 	if err != nil {
 		return fmt.Errorf("Error loading todo manager: %v\n", err)
 	}

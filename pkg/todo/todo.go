@@ -1,5 +1,12 @@
 package todo
 
+import (
+	"fmt"
+	"database/sql/driver"
+
+	"github.com/rs/xid"
+)
+
 type TodoStatus int
 
 const (
@@ -15,15 +22,20 @@ type TodoItem struct {
 	Status   TodoStatus `db:"status"`
 }
 
-func RotateStatus(status TodoStatus) TodoStatus {
-	switch status {
-	case Done:
-		return Todo
-	case Todo:
-		return Done
-	default:
-		return Todo
+func NewTodoItem(taskName string, projectName string) (*TodoItem, error) {
+	guid := xid.New()
+
+	todoStatus, err := TodoStatusString("Todo")
+	if err != nil {
+		return nil, fmt.Errorf("Error initializing todo status: %w\n", err)
 	}
+
+	return &TodoItem{
+		Id:       guid.String(),
+		TaskName: taskName,
+		Project:  projectName,
+		Status:   todoStatus,
+	}, nil
 }
 
 func statusStrings(statuses []TodoStatus) []string {
@@ -32,4 +44,17 @@ func statusStrings(statuses []TodoStatus) []string {
 		statusStrings = append(statusStrings, status.String())
 	}
 	return statusStrings
+}
+
+func (s TodoStatus) Value() (driver.Value, error) {
+	return driver.Value(s.String()), nil
+}
+
+func (s *TodoStatus) Scan(src interface{}) error {
+	todoStatus, err := TodoStatusString(src.(string))
+	if err != nil {
+		return fmt.Errorf("invalid todo status: %w", err)
+	}
+	*s = todoStatus
+	return nil
 }
