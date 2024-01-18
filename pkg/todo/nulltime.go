@@ -18,20 +18,20 @@ type NullTime struct {
 
 // Scan implements the Scanner interface.
 func (nt *NullTime) Scan(value interface{}) error {
-	switch value.(type) {
+	switch v := value.(type) {
 	case string:
-		if value == "" {
+		if v == "" {
 			nt.Valid = false
 			return nil
 		}
-		t, err := time.Parse(timeFormat, value.(string))
+		t, err := time.Parse(timeFormat, v)
 		if err != nil {
 			return fmt.Errorf("failed to parse time: %w", err)
 		}
 		nt.Valid = true
 		nt.Time = t
 	default:
-		nt.Time, nt.Valid = value.(time.Time)
+		return fmt.Errorf("unsupported type: %T", v)
 	}
     return nil
 }

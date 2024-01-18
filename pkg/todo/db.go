@@ -2,7 +2,11 @@ package todo
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"os"
+	"encoding/csv"
+	"path/filepath"
 
 	"github.com/jmoiron/sqlx"
 	sq "github.com/Masterminds/squirrel"
@@ -18,15 +22,51 @@ type TsvDb struct {
 	Db *sqlx.DB
 }
 
-func NewTsvDb(path string) (*TsvDb, error) {
-	db, err := sqlx.Open("csvq", path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open csvq: %w", err)
+func initTodoFile(path string) error {
+	if _, err := os.Stat(path); err == nil {
+		return nil
 	}
 
-	return &TsvDb{
-		Db: db,
-	}, nil
+	headers := []string{"id", "task", "project", "status", "due"}
+	file, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("failed to open todo.tsv: %w", err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	writer.Comma = '\t'
+	defer writer.Flush()
+	err = writer.Write(headers)
+	if err != nil {
+		return fmt.Errorf("failed to write headers: %w", err)
+	}
+
+	return nil
+}
+
+func NewTsvDb(path string) (*TsvDb, error) {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		err := os.MkdirAll(path, 0755)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create todo-simple directory: %w", err)
+		}
+	}
+
+	tsvFiles := []string{filepath.Join(path, "todo.tsv")}
+	for _, tsvFile := range tsvFiles {
+		err := initTodoFile(tsvFile)
+		if err != nil {
+			return nil, fmt.Errorf("failed to initialize %s: %w", tsvFile, err)
+		}
+	}
+
+	db, err := sqlx.Open("csvq", path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to opening tsv: %w", err)
+	}
+
+	return &TsvDb{Db: db}, nil
 }
 
 func (db *TsvDb) Close() error {
