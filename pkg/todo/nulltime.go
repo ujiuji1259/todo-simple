@@ -30,6 +30,9 @@ func (nt *NullTime) Scan(value interface{}) error {
 		}
 		nt.Valid = true
 		nt.Time = t
+	case nil:
+		nt.Valid = false
+		return nil
 	default:
 		return fmt.Errorf("unsupported type: %T", v)
 	}
