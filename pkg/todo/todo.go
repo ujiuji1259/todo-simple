@@ -16,13 +16,14 @@ const (
 )
 
 type TodoItem struct {
-	Id       string     `db:"id"`
-	TaskName string     `db:"task"`
-	Project  string     `db:"project"`
-	Status   TodoStatus `db:"status"`
+	Id       string       `db:"id"`
+	TaskName string       `db:"task"`
+	Project  string       `db:"project"`
+	Status   TodoStatus   `db:"status"`
+	Due      NullTime `db:"due"`
 }
 
-func NewTodoItem(taskName string, projectName string) (*TodoItem, error) {
+func NewTodoItem(taskName string, projectName string, due NullTime) (*TodoItem, error) {
 	guid := xid.New()
 
 	todoStatus, err := TodoStatusString("Todo")
@@ -35,6 +36,7 @@ func NewTodoItem(taskName string, projectName string) (*TodoItem, error) {
 		TaskName: taskName,
 		Project:  projectName,
 		Status:   todoStatus,
+		Due: 	  due,
 	}, nil
 }
 

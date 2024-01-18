@@ -13,7 +13,7 @@ import (
 type AddCmd struct{}
 
 func (c *AddCmd) Run() error {
-	taskName, projectName, err := loadTodoFromUI()
+	taskName, projectName, due, err := loadTodoFromUI()
 	if err != nil {
 		return fmt.Errorf("Error loading todo from UI: %w\n", err)
 	}
@@ -32,7 +32,7 @@ func (c *AddCmd) Run() error {
 		}
 	}()
 
-	newTodoItem, err := todo.NewTodoItem(taskName, projectName)
+	newTodoItem, err := todo.NewTodoItem(taskName, projectName, due)
 	if err != nil {
 		return fmt.Errorf("Error initializing todo item: %w\n", err)
 	}
@@ -44,14 +44,14 @@ func (c *AddCmd) Run() error {
 	return nil
 }
 
-func loadTodoFromUI() (string, string, error) {
+func loadTodoFromUI() (string, string, todo.NullTime, error) {
 	taskNamePrompt := promptui.Prompt{
 		Label: "Task Name",
 	}
 	taskName, err := taskNamePrompt.Run()
 	if err != nil {
 		fmt.Printf("Prompt failed %v\n", err)
-		return "", "", err
+		return "", "", todo.NullTime{}, err
 	}
 
 	projectNamePrompt := promptui.Prompt{
@@ -60,8 +60,37 @@ func loadTodoFromUI() (string, string, error) {
 	projectName, err := projectNamePrompt.Run()
 	if err != nil {
 		fmt.Printf("Prompt failed %v\n", err)
-		return "", "", err
+		return "", "", todo.NullTime{}, err
 	}
 
-	return taskName, projectName, nil
+	duePrompt := promptui.Prompt{
+		Label: "Due Date (YYYY-MM-DD)",
+	}
+	dueString, err := duePrompt.Run()
+	if err != nil {
+		fmt.Printf("Prompt failed %v\n", err)
+		return "", "", todo.NullTime{}, err
+	}
+	due, err := parseNullTimeString(dueString)
+	if err != nil {
+		return "", "", todo.NullTime{}, fmt.Errorf("Error parsing time: %w\n", err)
+	}
+
+	return taskName, projectName, due, nil
+}
+
+func parseNullTimeString(timeString string) (todo.NullTime, error) {
+	if timeString == "" {
+		return todo.NullTime{}, nil
+	}
+
+	t, err := time.ParseInLocation("2006-01-02", timeString, time.Local)
+	if err != nil {
+		return todo.NullTime{}, fmt.Errorf("Error parsing time: %w\n", err)
+	}
+
+	return todo.NullTime{
+		Time: t,
+		Valid: true,
+	}, nil
 }

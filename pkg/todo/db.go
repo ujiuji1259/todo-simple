@@ -38,7 +38,7 @@ func addDelemiterToQuery(query string) string {
 }
 
 func (db *TsvDb) ListItems(ctx context.Context, projects []string, statuses []TodoStatus) ([]*TodoItem, error) {
-	sql := sq.Select("id", "task", "project", "status").From("`todo.tsv`")
+	sql := sq.Select("id", "task", "project", "status", "due").From("`todo.tsv`")
 	if len(projects) > 0 {
 		sql = sql.Where(sq.Eq{"project": projects})
 	}
@@ -63,8 +63,8 @@ func (db *TsvDb) ListItems(ctx context.Context, projects []string, statuses []To
 
 func (db *TsvDb) Add(ctx context.Context, todoItem TodoItem) error {
 	query, args, err := sq.Insert("`todo.tsv`").
-		Columns("id", "task", "project", "status").
-		Values(todoItem.Id, todoItem.TaskName, todoItem.Project, todoItem.Status.String()).
+		Columns("id", "task", "project", "status", "due").
+		Values(todoItem.Id, todoItem.TaskName, todoItem.Project, todoItem.Status.String(), todoItem.Due).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("failed to build query: %w", err)
@@ -101,7 +101,7 @@ func (db *TsvDb) Delete(ctx context.Context, taskId string) error {
 }
 
 func (db *TsvDb) ListItem(ctx context.Context, taskId string) (*TodoItem, error) {
-	query, args, err := sq.Select("id", "task", "project", "status").
+	query, args, err := sq.Select("id", "task", "project", "status", "due").
 		From("`todo.tsv`").
 		Where(sq.Eq{"id": taskId}).
 		ToSql()
