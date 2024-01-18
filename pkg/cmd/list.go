@@ -9,7 +9,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 
-	"todo-simple/pkg/todo"
+	"github.com/ujiuji1259/todo-simple/pkg/todo"
 )
 
 type ListCmd struct {

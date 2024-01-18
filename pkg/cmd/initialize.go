@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/adrg/xdg"
-	"todo-simple/pkg/todo"
+	"github.com/ujiuji1259/todo-simple/pkg/todo"
 )
 
 func getDb() (*todo.TsvDb, error) {

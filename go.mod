@@ -1,4 +1,4 @@
-module todo-simple
+module github.com/ujiuji1259/todo-simple
 
 go 1.21.5
 

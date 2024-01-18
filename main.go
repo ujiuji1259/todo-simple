@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/alecthomas/kong"
-	"todo-simple/pkg/cmd"
+	"github.com/ujiuji1259/todo-simple/pkg/cmd"
 )
 
 var CLI struct {

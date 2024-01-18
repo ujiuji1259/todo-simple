@@ -7,7 +7,7 @@ import (
 
 	"github.com/manifoldco/promptui"
 
-	"todo-simple/pkg/todo"
+	"github.com/ujiuji1259/todo-simple/pkg/todo"
 )
 
 type AddCmd struct{}

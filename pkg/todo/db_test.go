@@ -7,7 +7,7 @@ import (
 	"testing"
 	"path/filepath"
 
-	"todo-simple/pkg/todo"
+	"github.com/ujiuji1259/todo-simple/pkg/todo"
 )
 
 func TestNewTsvDb(t *testing.T) {
