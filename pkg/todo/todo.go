@@ -20,7 +20,7 @@ type TodoItem struct {
 	TaskName string       `db:"task"`
 	Project  string       `db:"project"`
 	Status   TodoStatus   `db:"status"`
-	Due      NullTime     `db:"due"`
+	Due      NullTime `db:"due"`
 }
 
 func NewTodoItem(taskName string, projectName string, due NullTime) (*TodoItem, error) {

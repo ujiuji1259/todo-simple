@@ -135,28 +135,13 @@ func (db *TsvDb) Delete(ctx context.Context, taskId string) error {
 	}
 
 	affected, _ := ret.RowsAffected()
+	if affected == 0 {
+		fmt.Printf("RowsAffected: %d\n", affected)
+		return errors.New("target task is not found")
+	}
 	fmt.Printf("RowsAffected: %d\n", affected)
 
 	return nil
-}
-
-func (db *TsvDb) ListItem(ctx context.Context, taskId string) (*TodoItem, error) {
-	query, args, err := sq.Select("id", "task", "project", "status", "due").
-		From("`todo.tsv`").
-		Where(sq.Eq{"id": taskId}).
-		ToSql()
-	if err != nil {
-		return nil, fmt.Errorf("failed to build query: %w", err)
-	}
-	listQueryWithDelemiter := addDelemiterToQuery(query)
-
-	var item TodoItem
-	err = db.Db.GetContext(ctx, &item, listQueryWithDelemiter, args...)
-	if err != nil {
-		return nil, fmt.Errorf("fail to load: %w", err)
-	}
-
-	return &item, nil
 }
 
 func (db *TsvDb) UpdateStatus(ctx context.Context, taskId string, status TodoStatus) error {
