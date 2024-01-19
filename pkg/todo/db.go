@@ -78,7 +78,7 @@ func addDelemiterToQuery(query string) string {
 }
 
 func (db *TsvDb) ListItems(ctx context.Context, projects []string, statuses []TodoStatus) ([]*TodoItem, error) {
-	sql := sq.Select("id", "task", "project", "status", "due").From("`todo.tsv`")
+	sql := sq.Select("*").From("`todo.tsv`")
 	if len(projects) > 0 {
 		sql = sql.Where(sq.Eq{"project": projects})
 	}
@@ -104,7 +104,7 @@ func (db *TsvDb) ListItems(ctx context.Context, projects []string, statuses []To
 func (db *TsvDb) Add(ctx context.Context, todoItem TodoItem) error {
 	query, args, err := sq.Insert("`todo.tsv`").
 		Columns("id", "task", "project", "status", "due").
-		Values(todoItem.Id, todoItem.TaskName, todoItem.Project, todoItem.Status.String(), todoItem.Due).
+		Values(todoItem.Id, todoItem.TaskName, todoItem.Project, todoItem.Status, todoItem.Due).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("failed to build query: %w", err)
