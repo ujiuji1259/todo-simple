@@ -13,7 +13,7 @@ import (
 type AddCmd struct{}
 
 func (c *AddCmd) Run() error {
-	taskName, projectName, due, err := loadTodoFromUI()
+	taskName, projectName, due, estimation, err := loadTodoFromUI()
 	if err != nil {
 		return fmt.Errorf("Error loading todo from UI: %w\n", err)
 	}
@@ -32,7 +32,7 @@ func (c *AddCmd) Run() error {
 		}
 	}()
 
-	newTodoItem, err := todo.NewTodoItem(taskName, projectName, due)
+	newTodoItem, err := todo.NewTodoItem(taskName, projectName, due, estimation)
 	if err != nil {
 		return fmt.Errorf("Error initializing todo item: %w\n", err)
 	}
@@ -44,14 +44,14 @@ func (c *AddCmd) Run() error {
 	return nil
 }
 
-func loadTodoFromUI() (string, string, todo.NullTime, error) {
+func loadTodoFromUI() (string, string, todo.NullTime, todo.NullDuration, error) {
 	taskNamePrompt := promptui.Prompt{
 		Label: "Task Name",
 	}
 	taskName, err := taskNamePrompt.Run()
 	if err != nil {
 		fmt.Printf("Prompt failed %v\n", err)
-		return "", "", todo.NullTime{}, err
+		return "", "", todo.NullTime{}, todo.NullDuration{}, err
 	}
 
 	projectNamePrompt := promptui.Prompt{
@@ -60,7 +60,7 @@ func loadTodoFromUI() (string, string, todo.NullTime, error) {
 	projectName, err := projectNamePrompt.Run()
 	if err != nil {
 		fmt.Printf("Prompt failed %v\n", err)
-		return "", "", todo.NullTime{}, err
+		return "", "", todo.NullTime{}, todo.NullDuration{}, err
 	}
 
 	duePrompt := promptui.Prompt{
@@ -69,14 +69,27 @@ func loadTodoFromUI() (string, string, todo.NullTime, error) {
 	dueString, err := duePrompt.Run()
 	if err != nil {
 		fmt.Printf("Prompt failed %v\n", err)
-		return "", "", todo.NullTime{}, err
+		return "", "", todo.NullTime{}, todo.NullDuration{}, err
 	}
 	due, err := parseNullTimeString(dueString)
 	if err != nil {
-		return "", "", todo.NullTime{}, fmt.Errorf("Error parsing time: %w\n", err)
+		return "", "", todo.NullTime{}, todo.NullDuration{}, fmt.Errorf("Error parsing time: %w\n", err)
 	}
 
-	return taskName, projectName, due, nil
+	estimationsPrompt := promptui.Prompt{
+		Label: "Estimations (e.g. 1h30m)",
+	}
+	estimationString, err := estimationsPrompt.Run()
+	if err != nil {
+		fmt.Printf("Prompt failed %v\n", err)
+		return "", "", todo.NullTime{}, todo.NullDuration{}, err
+	}
+	estimation, err := parseNullDurationString(estimationString)
+	if err != nil {
+		return "", "", todo.NullTime{}, todo.NullDuration{}, fmt.Errorf("Error parsing time: %w\n", err)
+	}
+
+	return taskName, projectName, due, estimation, nil
 }
 
 func parseNullTimeString(timeString string) (todo.NullTime, error) {
@@ -91,6 +104,22 @@ func parseNullTimeString(timeString string) (todo.NullTime, error) {
 
 	return todo.NullTime{
 		Time: t,
+		Valid: true,
+	}, nil
+}
+
+func parseNullDurationString(durationString string) (todo.NullDuration, error) {
+	if durationString == "" {
+		return todo.NullDuration{}, nil
+	}
+
+	d, err := time.ParseDuration(durationString)
+	if err != nil {
+		return todo.NullDuration{}, fmt.Errorf("Error parsing estimations: %w\n", err)
+	}
+
+	return todo.NullDuration{
+		Duration: d,
 		Valid: true,
 	}, nil
 }

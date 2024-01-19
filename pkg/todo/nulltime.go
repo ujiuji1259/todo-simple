@@ -46,3 +46,40 @@ func (nt NullTime) Value() (driver.Value, error) {
     }
     return driver.Value(nt.Time.Format(timeFormat)), nil
 }
+
+
+type NullDuration struct {
+    Duration  time.Duration
+    Valid bool 
+}
+
+// Scan implements the Scanner interface.
+func (nd *NullDuration) Scan(value interface{}) error {
+	switch v := value.(type) {
+		case string:
+			if v == "" {
+				nd.Valid = false
+				return nil
+			}
+			d, err := time.ParseDuration(v)
+			if err != nil {
+				return fmt.Errorf("failed to parse duration: %w", err)
+			}
+			nd.Duration = d
+			nd.Valid = true
+		case nil:
+			nd.Valid = false
+			return nil
+		default:
+			return fmt.Errorf("unsupported type: %T", v)
+	}
+    return nil
+}
+
+// Value implements the driver Valuer interface.
+func (nd NullDuration) Value() (driver.Value, error) {
+    if !nd.Valid {
+        return nil, nil
+    }
+    return driver.Value(nd.Duration.String()), nil
+}

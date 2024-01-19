@@ -26,7 +26,7 @@ func TestNewTsvDb(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create todo-simple-with-todo directory: %s", err)
 	}
-	err = os.WriteFile(filepath.Join(todoFileWithTsv, "todo.tsv"), []byte("id\ttask\tproject\tstatus\tdue\n"), 0644)
+	err = os.WriteFile(filepath.Join(todoFileWithTsv, "todo.tsv"), []byte("id\ttask\tproject\tstatus\tdue\testimation\n"), 0644)
 	if err != nil {
 		t.Fatalf("failed to create todo-simple-with-todo tsv file: %s", err)
 	}
@@ -55,7 +55,7 @@ func TestNewTsvDb(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed to read todo.tsv: %s", err)
 			}
-			expected := "id\ttask\tproject\tstatus\tdue\n"
+			expected := "id\ttask\tproject\tstatus\tdue\testimation\n"
 			if string(bytes) != expected {
 				t.Fatalf("expected %s, got %s", expected, string(bytes))
 			}
@@ -75,14 +75,14 @@ func TestListItems(t *testing.T) {
 		isError  bool
 	}{
 		"Empty todo.tsv": {
-			"id\ttask\tproject\tstatus\tdue\n", 
+			"id\ttask\tproject\tstatus\tdue\testimation\n", 
 			[]string{}, 
 			[]todo.TodoStatus{}, 
 			[]*todo.TodoItem{},
 			false,
 		},
 		"no filter": {
-			"id\ttask\tproject\tstatus\tdue\n0\thoge\thoge\tTodo\t\"\"\n", 
+			"id\ttask\tproject\tstatus\tdue\testimation\n0\thoge\thoge\tTodo\t\t\n", 
 			[]string{}, 
 			[]todo.TodoStatus{}, 
 			[]*todo.TodoItem{
@@ -96,7 +96,7 @@ func TestListItems(t *testing.T) {
 			false,
 		},
 		"project filter": {
-			"id\ttask\tproject\tstatus\tdue\n0\thoge\thoge\tTodo\t\"\"\nfuga\tfuga\tfuga\tTodo\t\"\"\n",
+			"id\ttask\tproject\tstatus\tdue\testimation\n0\thoge\thoge\tTodo\t\t\nfuga\tfuga\tfuga\tTodo\t\t\n",
 			[]string{"hoge"}, 
 			[]todo.TodoStatus{}, 
 			[]*todo.TodoItem{
@@ -110,7 +110,7 @@ func TestListItems(t *testing.T) {
 			false,
 		},
 		"status filter": {
-			"id\ttask\tproject\tstatus\tdue\n0\thoge\thoge\tTodo\t\"\"\nfuga\tfuga\tfuga\tDone\t\"\"\n",
+			"id\ttask\tproject\tstatus\tdue\testimation\n0\thoge\thoge\tTodo\t\t\nfuga\tfuga\tfuga\tDone\t\t\n",
 			[]string{}, 
 			[]todo.TodoStatus{todo.Todo}, 
 			[]*todo.TodoItem{
@@ -124,14 +124,14 @@ func TestListItems(t *testing.T) {
 			false,
 		},
 		"invalid status": {
-			"id\ttask\tproject\tstatus\tdue\n0\thoge\thoge\tHoge\t\"\"\n",
+			"id\ttask\tproject\tstatus\tdue\testimation\n0\thoge\thoge\tHoge\t\t\n",
 			[]string{}, 
 			[]todo.TodoStatus{}, 
 			[]*todo.TodoItem{},
 			true,
 		},
 		"invalid due": {
-			"id\ttask\tproject\tstatus\tdue\n0\thoge\thoge\tHoge\t2023-12-12T12\n",
+			"id\ttask\tproject\tstatus\tdue\testimation\n0\thoge\thoge\tHoge\t2023-12-12T12\t\n",
 			[]string{}, 
 			[]todo.TodoStatus{}, 
 			[]*todo.TodoItem{},
@@ -197,14 +197,14 @@ func TestAdd(t *testing.T) {
 		isError  bool
 	}{
 		"Add task": {
-			"id\ttask\tproject\tstatus\tdue\n", 
+			"id\ttask\tproject\tstatus\tdue\testimation\n", 
 			todo.TodoItem{
 				Id: "0",
 				TaskName: "hoge",
 				Project: "hoge",
 				Status: todo.Todo,
 			},
-			"id\ttask\tproject\tstatus\tdue\n0\thoge\thoge\tTodo\t\n",
+			"id\ttask\tproject\tstatus\tdue\testimation\n0\thoge\thoge\tTodo\t\t\n",
 			false,
 		},
 	}
@@ -254,13 +254,13 @@ func TestDelete(t *testing.T) {
 		isError  bool
 	}{
 		"Delete task": {
-			"id\ttask\tproject\tstatus\tdue\n0\thoge\thoge\tTodo\t\n", 
+			"id\ttask\tproject\tstatus\tdue\testimation\n0\thoge\thoge\tTodo\t\t\n", 
 			"0",
-			"id\ttask\tproject\tstatus\tdue\n",
+			"id\ttask\tproject\tstatus\tdue\testimation\n",
 			false,
 		},
 		"Not existing task id": {
-			"id\ttask\tproject\tstatus\tdue\n0\thoge\thoge\tTodo\t\n", 
+			"id\ttask\tproject\tstatus\tdue\testimation\n0\thoge\thoge\tTodo\t\t\n", 
 			"1",
 			"", 
 			true,
@@ -313,17 +313,17 @@ func TestUpdate(t *testing.T) {
 		isError  bool
 	}{
 		"Change status": {
-			"id\ttask\tproject\tstatus\tdue\n0\thoge\thoge\tTodo\t\n", 
+			"id\ttask\tproject\tstatus\tdue\testimation\n0\thoge\thoge\tTodo\t\t\n", 
 			"0",
 			todo.Done,
-			"id\ttask\tproject\tstatus\tdue\n0\thoge\thoge\tDone\t\n", 
+			"id\ttask\tproject\tstatus\tdue\testimation\n0\thoge\thoge\tDone\t\t\n", 
 			false,
 		},
 		"same status": {
-			"id\ttask\tproject\tstatus\tdue\n0\thoge\thoge\tTodo\t\n", 
+			"id\ttask\tproject\tstatus\tdue\testimation\n0\thoge\thoge\tTodo\t\t\n", 
 			"0",
 			todo.Todo,
-			"id\ttask\tproject\tstatus\tdue\n0\thoge\thoge\tTodo\t\n", 
+			"id\ttask\tproject\tstatus\tdue\testimation\n0\thoge\thoge\tTodo\t\t\n", 
 			false,
 		},
 	}

@@ -54,7 +54,7 @@ func renderTodoItems(todoItems []*todo.TodoItem) error {
 	writer.Comma = '\t'
 	defer writer.Flush()
 
-	err := writer.Write([]string{"Id", "Task Name", "Project Name", "Status", "Due"})
+	err := writer.Write([]string{"Id", "Task Name", "Project Name", "Status", "Due", "Estimation"})
 	if err != nil {
 		return fmt.Errorf("failed to write header: %w\n", err)
 	}
@@ -63,6 +63,10 @@ func renderTodoItems(todoItems []*todo.TodoItem) error {
 		if v.Due.Valid {
 			due = v.Due.Time.String()
 		}
+		var estimation string
+		if v.Estimation.Valid {
+			estimation = v.Estimation.Duration.String()
+		}
 
 		err := writer.Write([]string{
 			v.Id,
@@ -70,6 +74,7 @@ func renderTodoItems(todoItems []*todo.TodoItem) error {
 			v.Project,
 			v.Status.String(),
 			due,
+			estimation,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to write data: %w\n", err)
@@ -80,18 +85,24 @@ func renderTodoItems(todoItems []*todo.TodoItem) error {
 
 func renderTodoItemsHumanReadable(todoItems []*todo.TodoItem) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Id", "Task Name", "Project Name", "Status", "Due"})
+	table.SetHeader([]string{"Id", "Task Name", "Project Name", "Status", "Due", "Estimation"})
 	for _, v := range todoItems {
 		var due string
 		if v.Due.Valid {
 			due = v.Due.Time.String()
 		}
+		var estimation string
+		if v.Estimation.Valid {
+			estimation = v.Estimation.Duration.String()
+		}
+
 		table.Append([]string{
 			v.Id,
 			v.TaskName,
 			v.Project,
 			v.Status.String(),
 			due,
+			estimation,
 		})
 	}
 	table.Render()

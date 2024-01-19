@@ -27,7 +27,7 @@ func initTodoFile(path string) error {
 		return nil
 	}
 
-	headers := []string{"id", "task", "project", "status", "due"}
+	headers := []string{"id", "task", "project", "status", "due", "estimation"}
 	file, err := os.Create(path)
 	if err != nil {
 		return fmt.Errorf("failed to open todo.tsv: %w", err)
@@ -103,8 +103,8 @@ func (db *TsvDb) ListItems(ctx context.Context, projects []string, statuses []To
 
 func (db *TsvDb) Add(ctx context.Context, todoItem TodoItem) error {
 	query, args, err := sq.Insert("`todo.tsv`").
-		Columns("id", "task", "project", "status", "due").
-		Values(todoItem.Id, todoItem.TaskName, todoItem.Project, todoItem.Status, todoItem.Due).
+		Columns("id", "task", "project", "status", "due", "estimation").
+		Values(todoItem.Id, todoItem.TaskName, todoItem.Project, todoItem.Status, todoItem.Due, todoItem.Estimation).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("failed to build query: %w", err)
