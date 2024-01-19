@@ -83,7 +83,7 @@ func (db *TsvDb) ListItems(ctx context.Context, projects []string, statuses []To
 		sql = sql.Where(sq.Eq{"project": projects})
 	}
 	if len(statuses) > 0 {
-		sql = sql.Where(sq.Eq{"status": statusStrings(statuses)})
+		sql = sql.Where(sq.Eq{"status": StatusStrings(statuses)})
 	}
 
 	query, args, err := sql.ToSql()

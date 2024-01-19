@@ -40,7 +40,7 @@ func NewTodoItem(taskName string, projectName string, due NullTime) (*TodoItem, 
 	}, nil
 }
 
-func statusStrings(statuses []TodoStatus) []string {
+func StatusStrings(statuses []TodoStatus) []string {
 	var statusStrings []string
 	for _, status := range statuses {
 		statusStrings = append(statusStrings, status.String())
