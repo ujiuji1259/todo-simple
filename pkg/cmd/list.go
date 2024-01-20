@@ -54,7 +54,7 @@ func renderTodoItems(todoItems []*todo.TodoItem) error {
 	writer.Comma = '\t'
 	defer writer.Flush()
 
-	err := writer.Write([]string{"Id", "Task Name", "Project Name", "Status", "Due", "Estimation"})
+	err := writer.Write([]string{"Id", "Task Name", "Project Name", "Status", "Due", "Estimation", "StartedAt", "EndedAt"})
 	if err != nil {
 		return fmt.Errorf("failed to write header: %w\n", err)
 	}
@@ -67,6 +67,14 @@ func renderTodoItems(todoItems []*todo.TodoItem) error {
 		if v.Estimation.Valid {
 			estimation = v.Estimation.Duration.String()
 		}
+		var startedAt string
+		if v.StartedAt.Valid {
+			startedAt = v.StartedAt.Time.String()
+		}
+		var endedAt string
+		if v.EndedAt.Valid {
+			endedAt = v.EndedAt.Time.String()
+		}
 
 		err := writer.Write([]string{
 			v.Id,
@@ -75,6 +83,8 @@ func renderTodoItems(todoItems []*todo.TodoItem) error {
 			v.Status.String(),
 			due,
 			estimation,
+			startedAt,
+			endedAt,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to write data: %w\n", err)
@@ -85,7 +95,7 @@ func renderTodoItems(todoItems []*todo.TodoItem) error {
 
 func renderTodoItemsHumanReadable(todoItems []*todo.TodoItem) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Id", "Task Name", "Project Name", "Status", "Due", "Estimation"})
+	table.SetHeader([]string{"Id", "Task Name", "Project Name", "Status", "Due", "Estimation", "StartedAt", "EndedAt"})
 	for _, v := range todoItems {
 		var due string
 		if v.Due.Valid {
@@ -95,6 +105,14 @@ func renderTodoItemsHumanReadable(todoItems []*todo.TodoItem) {
 		if v.Estimation.Valid {
 			estimation = v.Estimation.Duration.String()
 		}
+		var startedAt string
+		if v.StartedAt.Valid {
+			startedAt = v.StartedAt.Time.String()
+		}
+		var endedAt string
+		if v.EndedAt.Valid {
+			endedAt = v.EndedAt.Time.String()
+		}
 
 		table.Append([]string{
 			v.Id,
@@ -103,6 +121,8 @@ func renderTodoItemsHumanReadable(todoItems []*todo.TodoItem) {
 			v.Status.String(),
 			due,
 			estimation,
+			startedAt,
+			endedAt,
 		})
 	}
 	table.Render()

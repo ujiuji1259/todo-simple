@@ -24,6 +24,7 @@ type TodoItem struct {
 	Due        NullTime      `db:"due"`
 	Estimation NullDuration  `db:"estimation"`
 	StartedAt  NullTime      `db:"started_at"`
+	EndedAt    NullTime      `db:"ended_at"`
 }
 
 func NewTodoItem(taskName string, projectName string, due NullTime, estimation NullDuration) (*TodoItem, error) {
@@ -42,6 +43,7 @@ func NewTodoItem(taskName string, projectName string, due NullTime, estimation N
 		Due: 	    due,
 		Estimation: estimation,
 		StartedAt:  NullTime{Time: time.Time{}, Valid: false},
+		EndedAt:  NullTime{Time: time.Time{}, Valid: false},
 	}, nil
 }
 
