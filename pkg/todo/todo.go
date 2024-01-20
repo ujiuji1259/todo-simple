@@ -3,6 +3,7 @@ package todo
 import (
 	"fmt"
 	"database/sql/driver"
+	"time"
 
 	"github.com/rs/xid"
 )
@@ -22,6 +23,7 @@ type TodoItem struct {
 	Status     TodoStatus    `db:"status"`
 	Due        NullTime      `db:"due"`
 	Estimation NullDuration  `db:"estimation"`
+	StartedAt  NullTime      `db:"started_at"`
 }
 
 func NewTodoItem(taskName string, projectName string, due NullTime, estimation NullDuration) (*TodoItem, error) {
@@ -39,6 +41,7 @@ func NewTodoItem(taskName string, projectName string, due NullTime, estimation N
 		Status:     todoStatus,
 		Due: 	    due,
 		Estimation: estimation,
+		StartedAt:  NullTime{Time: time.Time{}, Valid: false},
 	}, nil
 }
 
