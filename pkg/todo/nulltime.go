@@ -16,6 +16,13 @@ type NullTime struct {
     Valid bool // Valid is true if Time is not NULL
 }
 
+func (nt NullTime) String() string {
+    if !nt.Valid {
+        return ""
+    }
+    return nt.Time.Format(timeFormat)
+}
+
 // Scan implements the Scanner interface.
 func (nt *NullTime) Scan(value interface{}) error {
 	switch v := value.(type) {

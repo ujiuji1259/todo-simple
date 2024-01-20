@@ -10,6 +10,7 @@ var CLI struct {
 	Add    cmd.AddCmd    `cmd:"" help:"Add task"`
 	Delete cmd.DeleteCmd `cmd:"" help:"Add task"`
 	Update cmd.UpdateCmd `cmd:"" help:"Update status of the specified task"`
+	Start  cmd.StartCmd  `cmd:"" help:"Start the specified task"`
 }
 
 func main() {

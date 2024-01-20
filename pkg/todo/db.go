@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 	"os"
 	"encoding/csv"
 	"path/filepath"
@@ -147,6 +148,30 @@ func (db *TsvDb) Delete(ctx context.Context, taskId string) error {
 func (db *TsvDb) UpdateStatus(ctx context.Context, taskId string, status TodoStatus) error {
 	query, args, err := sq.Update("`todo.tsv`").
 		Set("status", status.String()).
+		Where(sq.Eq{"id": taskId}).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build query: %w", err)
+	}
+
+	ret, err := db.Db.ExecContext(ctx, addDelemiterToQuery(query), args...)
+	if err != nil {
+		return fmt.Errorf("failed to update: %w", err)
+	}
+
+	affected, _ := ret.RowsAffected()
+	fmt.Printf("RowsAffected: %d\n", affected)
+
+	return nil
+}
+
+func (db *TsvDb) Start(ctx context.Context, taskId string, startedTime time.Time) error {
+	startedAt := NullTime{
+		Time: startedTime,
+		Valid: true,
+	}
+	query, args, err := sq.Update("`todo.tsv`").
+		Set("started_at", startedAt.String()).
 		Where(sq.Eq{"id": taskId}).
 		ToSql()
 	if err != nil {
