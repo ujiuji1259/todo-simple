@@ -11,6 +11,7 @@ var CLI struct {
 	Delete cmd.DeleteCmd `cmd:"" help:"Add task"`
 	Update cmd.UpdateCmd `cmd:"" help:"Update status of the specified task"`
 	Start  cmd.StartCmd  `cmd:"" help:"Start the specified task"`
+	End    cmd.EndCmd    `cmd:"" help:"End the specified task"`
 }
 
 func main() {

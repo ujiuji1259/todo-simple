@@ -188,3 +188,29 @@ func (db *TsvDb) Start(ctx context.Context, taskId string, startedTime time.Time
 
 	return nil
 }
+
+// TODO: Should return error when the task didn't start
+// TODO: Should log the duration to be spent with the task
+func (db *TsvDb) End(ctx context.Context, taskId string, endedTime time.Time) error {
+	EndedAt := NullTime{
+		Time: endedTime,
+		Valid: true,
+	}
+	query, args, err := sq.Update("`todo.tsv`").
+		Set("ended_at", EndedAt.String()).
+		Where(sq.Eq{"id": taskId}).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build query: %w", err)
+	}
+
+	ret, err := db.Db.ExecContext(ctx, addDelemiterToQuery(query), args...)
+	if err != nil {
+		return fmt.Errorf("failed to update: %w", err)
+	}
+
+	affected, _ := ret.RowsAffected()
+	fmt.Printf("RowsAffected: %d\n", affected)
+
+	return nil
+}

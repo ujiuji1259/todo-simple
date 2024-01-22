@@ -423,3 +423,64 @@ func TestStart(t *testing.T) {
 		})
 	}
 }
+
+func TestEnd(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	cases := map[string]struct{
+		body      string
+		id        string
+		endedAt   time.Time
+		expected  string
+		isError   bool
+	}{
+		"Add endedAt": {
+			"id\ttask\tproject\tstatus\tdue\testimation\tstarted_at\tended_at\n0\thoge\thoge\tTodo\t\t\t\t\n", 
+			"0",
+			time.Date(2024, 1, 20, 0, 0, 0, 0, time.FixedZone("UTC", 0)),
+			"id\ttask\tproject\tstatus\tdue\testimation\tstarted_at\tended_at\n0\thoge\thoge\tTodo\t\t\t\t2024-01-20 00:00:00 +0000\n", 
+			false,
+		},
+		"Overwrite endedAt": {
+			"id\ttask\tproject\tstatus\tdue\testimation\tstarted_at\tended_at\n0\thoge\thoge\tTodo\t\t\t\t2023-01-20 00:00:00 +0000\n", 
+			"0",
+			time.Date(2024, 1, 20, 0, 0, 0, 0, time.FixedZone("UTC", 0)),
+			"id\ttask\tproject\tstatus\tdue\testimation\tstarted_at\tended_at\n0\thoge\thoge\tTodo\t\t\t\t2024-01-20 00:00:00 +0000\n", 
+			false,
+		},
+	}
+
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			todoFile := filepath.Join(tmpDir, "todo.tsv")
+			err := os.WriteFile(todoFile, []byte(c.body), 0644)
+			if err != nil {
+				t.Fatalf("failed to create todo.tsv: %s", err)
+			}
+
+			db, err := todo.NewTsvDb(tmpDir)
+			if err != nil {
+				t.Fatalf("failed to create tsv db: %s", err)
+			}
+			defer db.Close()
+
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			err = db.End(ctx, c.id, c.endedAt)
+			if c.isError && err == nil {
+				t.Fatalf("expected error, got nil")
+			} else if !c.isError && err != nil {
+				t.Fatalf("failed to list items: %s", err)
+			} else if !c.isError {
+				result, err := os.ReadFile(todoFile)
+				if err != nil {
+					t.Fatalf("failed to read todo.tsv: %s", err)
+				}
+				if string(result) != c.expected {
+					t.Fatalf("expected %s, got %s", c.expected, string(result))
+				}
+			}
+		})
+	}
+}
